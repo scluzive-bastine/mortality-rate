@@ -1,0 +1,33 @@
+    /* Tooltip CSS */
+    .tooltip {
+        line-height: 1.5;
+        font-weight: 400;
+        font-size: 12px;
+        font-family: 'avenir next', Arial, sans-serif;
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #d5d3d3;
+        background: #fff;
+        color: #222426;
+        pointer-events: none;
+        position: absolute;
+        text-align: center;
+        min-width: 100px;
+    }
+
+    /* Creates a small triangle extender for the tooltip */
+    .tooltip:after {
+        box-sizing: border-box;
+        display: inline;
+        font-size: 8px;
+        width: 100%;
+        line-height: 1.5;
+        color: #fff;
+        position: absolute;
+        pointer-events: none;
+        user-select: none;
+    }
+
+    #chloropleth_chart svg {
+        width: 100%!important;
+    }

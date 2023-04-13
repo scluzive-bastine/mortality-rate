@@ -50,6 +50,7 @@ const distribution = (c) => {
     })
 
     mergedData = d3.group(mergedData, (g) => g.ContinentCode).get(c)
+    document.querySelector('#current_country').innerHTML = mergedData[0].Continent
 
     // let dd = mergedData.get(c)
 
@@ -61,9 +62,6 @@ const distribution = (c) => {
     const width = +svg.attr('width') - margin.left - margin.right
     const height = +svg.attr('height') - margin.top - margin.bottom
     let g = svg.append('g').attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
-
-    // Define the data
-    // const data = [  { country: 'USA', male: 1000, female: 800, both: 1800 },  { country: 'Canada', male: 600, female: 500, both: 1100 },  { country: 'Mexico', male: 800, female: 700, both: 1500 },  // Add more countries as needed];
 
     // Set up the scales
     const xScale = d3
@@ -101,15 +99,29 @@ const distribution = (c) => {
       .append('rect')
       .attr('x', (d) => (xScale.bandwidth() / 3) * ['male', 'female', 'both'].indexOf(d.sex))
 
-      //   .attr('height', (d) => height - y(0)) // always equal to 0
+      //   .attr('height', (d) => height - y(0)) // always equal to 0 ~ example
       //   .attr('y', (d) => y(0))
 
-      .attr('y', (d) => yScale(d.value))
-      .attr('height', (d) => height - yScale(d.value))
-      //   .attr('height', (d) => height - yScale(0))
+      //   .attr('y', (d) => yScale(d.value))
+      //   .attr('height', (d) => height - yScale(d.value))
+
+      .attr('y', (d) => yScale(0))
+      .attr('height', (d) => height - yScale(0))
       .attr('width', xScale.bandwidth() / 3)
       .attr('fill', (d) => color(d.sex))
       .selectAll('text')
+
+    // Animation
+    svg
+      .selectAll('rect')
+      .transition()
+      .duration(800)
+      .attr('y', (d) => yScale(+d.value))
+      .attr('height', (d) => height - yScale(+d.value))
+      .delay((d, i) => {
+        // console.log(i)
+        return i * 20
+      })
 
     // Add the X axis
     g.append('g')

@@ -92,6 +92,13 @@ const init = () => {
       .on('click', function (d) {
         distribution(d.srcElement.__data__.SpatialDimensionValueCode)
       })
+      .on('mouseover', function () {
+        d3.select(this).attr('fill', '#477e71')
+        d3.select(this).style('cursor', 'pointer')
+      })
+      .on('mouseout', function () {
+        d3.select(this).attr('fill', '#69b3a2')
+      })
 
     // Animation
     svg
@@ -105,4 +112,67 @@ const init = () => {
         return i * 100
       })
   }
+
+  // Cause of death
+
+  let causes = [],
+    causesName = [],
+    underFiveDeath = []
+
+  Promise.all([
+    d3.csv('../assets/MORT_300.csv', function (data) {
+      causes.push(data)
+    }),
+    d3.csv('../assets/codes/CHILDCAUSE.csv', function (data) {
+      causesName.push(data)
+    }),
+    d3.csv('../assets/CM_01.csv', function (data) {
+      underFiveDeath.push(data)
+    }),
+  ]).then(function (data) {
+    const nestedData = d3.group(causes, (d) => d.DisaggregatingDimension3ValueCode)
+    const totals = Array.from(nestedData, ([cause, values]) => ({
+      cause,
+      totalDeaths: d3.sum(values, (d) => +d.Value),
+    }))
+
+    // Find the cause with the highest total death count
+
+    const maxCause = d3.max(totals, (d) => d.totalDeaths)
+    let highestCause = totals.find((d) => d.totalDeaths === maxCause)
+
+    let name = causesName.find((d) => d.Code === highestCause.cause)
+    document.querySelector('.cause').innerHTML = name.Title
+    document.querySelector('.cause_value').innerHTML = 'Total ' + formatNumber(Math.round(maxCause))
+
+    // Under five Death
+    let underFive = underFiveDeath.filter(function (d) {
+      return d.SpatialDimensionValueCode === 'GLOBAL' && d.TimeDimensionValue === '2020'
+    })
+    document.querySelector('.under_five_deaths').innerHTML = formatNumber(underFive[0].NumericValue)
+
+    const continentsNested = d3.group(underFiveDeath, (d) => d.SpatialDimension)
+    let d = continentsNested.get('REGION').filter(function (d) {
+      return (
+        d.TimeDimensionValue === '2020' &&
+        d.DisaggregatingDimension1ValueCode === 'BTSX' &&
+        d.SpatialDimensionValueCode !== 'GLOBAL'
+      )
+    })
+
+    const continentsTotal = Array.from(
+      d3.group(d, (c) => c.SpatialDimensionValueCode),
+      ([continent, values]) => ({
+        continent,
+        total: d3.sum(values, (v) => +v.NumericValue),
+      })
+    )
+    const maxDeathContinent = d3.max(continentsTotal, (d) => d.total)
+
+    document.querySelector('.continent_death').innerHTML = formatNumber(maxDeathContinent)
+  })
+
+  // d3.csv('../assets/MORT_300.csv', function (data) {
+  //   causes.push(data)
+  // }).then(function (d) {})
 }
