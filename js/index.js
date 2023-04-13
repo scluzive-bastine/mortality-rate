@@ -1,9 +1,5 @@
 const init = () => {
-  const WORLD_GEOJSON_URL =
-    'https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson'
-
-  const MORTALITY_RATE =
-    'https://raw.githubusercontent.com/scluzive-bastine/mortality-rate/main/assets/MDG_0000000007.csv'
+  const MORTALITY_RATE = '../assets/MDG_0000000007.csv'
 
   let mortalityRate = [],
     regions = []
@@ -113,7 +109,7 @@ const init = () => {
       })
   }
 
-  // Cause of death
+  // Cause of death  and Disoveries from the dataset
 
   let causes = [],
     causesName = [],
@@ -121,12 +117,15 @@ const init = () => {
 
   Promise.all([
     d3.csv('../assets/MORT_300.csv', function (data) {
+      // Distribution of causes of death among children aged < 5 years
       causes.push(data)
     }),
     d3.csv('../assets/codes/CHILDCAUSE.csv', function (data) {
+      // Code for cause of death
       causesName.push(data)
     }),
     d3.csv('../assets/CM_01.csv', function (data) {
+      // Regions and countries data set on Number of deaths among children under-five
       underFiveDeath.push(data)
     }),
   ]).then(function (data) {
@@ -137,13 +136,12 @@ const init = () => {
     }))
 
     // Find the cause with the highest total death count
-
     const maxCause = d3.max(totals, (d) => d.totalDeaths)
     let highestCause = totals.find((d) => d.totalDeaths === maxCause)
 
     let name = causesName.find((d) => d.Code === highestCause.cause)
     document.querySelector('.cause').innerHTML = name.Title
-    document.querySelector('.cause_value').innerHTML = 'Total ' + formatNumber(Math.round(maxCause))
+    document.querySelector('.cause_value').innerHTML = 'Total ' + formatNumber(Math.round(maxCause)) // showing data in html
 
     // Under five Death
     let underFive = underFiveDeath.filter(function (d) {
